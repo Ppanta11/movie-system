@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="px-6 md:px-16 lg:px-36 mt-40  w-full text-gray-300">
             <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-500 pb-14">
                 <div className="md:max-w-96">
-                    <img alt="" classname="h-11" src={assets.logo} />
+                    <img alt="" className="h-11" src={assets.logo} />
                     <p className="mt-6 text-sm">
                     Quick Show — a movie booking system that lets users explore movies, view screening times,
                     and reserve seats easily. It features an admin panel for adding movies and a smooth connection
