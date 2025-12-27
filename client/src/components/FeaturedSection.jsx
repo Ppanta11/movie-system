@@ -1,9 +1,9 @@
-import { ArrowRight } from 'lucide-react';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import BlurCircle from './BlurCircle';
-import { dummyShowsData } from '../assets/assets';
-import MovieCard from './MovieCard';
+import { ArrowRight } from "lucide-react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import BlurCircle from "./BlurCircle";
+import { dummyShowsData } from "../assets/assets";
+import MovieCard from "./MovieCard";
 
 const FeaturedSection = () => {
   const navigate = useNavigate();
@@ -13,11 +13,12 @@ const FeaturedSection = () => {
       <div className="relative flex items-center justify-between pt-20 pb-10">
         <BlurCircle top="0px" right="-80px" />
         <p className="text-gray-300 font-medium text-lg">Now Showing</p>
-        <button 
-          onClick={() => navigate('/movies')}
+        <button
+          onClick={() => navigate("/movies")}
           className="group flex items-center gap-2 text-sm text-gray-300 cursor-pointer"
         >
-          View All <ArrowRight className="group-hover:translate-x-1 transition w-5 h-5" />
+          View All{" "}
+          <ArrowRight className="group-hover:translate-x-1 transition w-5 h-5" />
         </button>
       </div>
 
@@ -29,9 +30,13 @@ const FeaturedSection = () => {
 
       <div className="flex justify-center mt-20">
         <button
-          onClick={() => { navigate('/movies'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className="px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md font-medium cursor-pointer">
-            Show More
+          onClick={() => {
+            navigate("/movies");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className="px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md font-medium cursor-pointer"
+        >
+          Show More
         </button>
       </div>
     </div>
