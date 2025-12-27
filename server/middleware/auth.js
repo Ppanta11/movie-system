@@ -17,12 +17,13 @@ export const protectAdmin = async (req, res, next) => {
 
     // Check public metadata role
     if (user.publicMetadata?.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Not authorized" });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
     }
 
-    req.user = user; 
+    req.user = user;
     next();
-
   } catch (err) {
     console.error(err);
     return res.status(401).json({ success: false, message: "Invalid token" });

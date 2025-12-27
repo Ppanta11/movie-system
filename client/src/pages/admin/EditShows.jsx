@@ -1,16 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import Title from '../../components/admin/Title';
+import React, { useState, useEffect } from "react";
+import Title from "../../components/admin/Title";
 
 const EditShows = () => {
   const [shows, setShows] = useState([]);
   const [selectedShow, setSelectedShow] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     // Fetch shows from backend or use static data
     const fetchedShows = [
-      { id: 1, movieName: 'Movie A', theater: 'Theater 1', posterUrl: '', price: '10', showTimes: ['2025-10-26T10:00', '2025-10-26T14:00'] },
-      { id: 2, movieName: 'Movie B', theater: 'Theater 2', posterUrl: '', price: '12', showTimes: ['2025-10-26T12:00'] },
+      {
+        id: 1,
+        movieName: "Movie A",
+        theater: "Theater 1",
+        posterUrl: "",
+        price: "10",
+        showTimes: ["2025-10-26T10:00", "2025-10-26T14:00"],
+      },
+      {
+        id: 2,
+        movieName: "Movie B",
+        theater: "Theater 2",
+        posterUrl: "",
+        price: "12",
+        showTimes: ["2025-10-26T12:00"],
+      },
     ];
     setShows(fetchedShows);
   }, []);
@@ -31,7 +45,10 @@ const EditShows = () => {
   };
 
   const addShowTime = () => {
-    setSelectedShow({ ...selectedShow, showTimes: [...selectedShow.showTimes, ''] });
+    setSelectedShow({
+      ...selectedShow,
+      showTimes: [...selectedShow.showTimes, ""],
+    });
   };
 
   const removeShowTime = (index) => {
@@ -41,10 +58,12 @@ const EditShows = () => {
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    const updatedShows = shows.map(show => show.id === selectedShow.id ? selectedShow : show);
+    const updatedShows = shows.map((show) =>
+      show.id === selectedShow.id ? selectedShow : show,
+    );
     setShows(updatedShows);
-    setMessage('Movie show updated successfully!');
-    setTimeout(() => setMessage(''), 3000);
+    setMessage("Movie show updated successfully!");
+    setTimeout(() => setMessage(""), 3000);
     setSelectedShow(null);
   };
 
@@ -59,7 +78,9 @@ const EditShows = () => {
         {selectedShow ? (
           <form onSubmit={handleUpdate}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Movie Name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Movie Name
+              </label>
               <input
                 type="text"
                 name="movieName"
@@ -71,7 +92,9 @@ const EditShows = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Theater</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Theater
+              </label>
               <input
                 type="text"
                 name="theater"
@@ -112,7 +135,9 @@ const EditShows = () => {
             </button>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Poster URL</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Poster URL
+              </label>
               <input
                 type="url"
                 name="posterUrl"
@@ -124,7 +149,9 @@ const EditShows = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700">Ticket Price</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Ticket Price
+              </label>
               <input
                 type="number"
                 name="price"
@@ -146,12 +173,17 @@ const EditShows = () => {
           </form>
         ) : (
           <ul className="space-y-4">
-            {shows.map(show => (
-              <li key={show.id} className="flex justify-between items-center border p-4 rounded-md">
+            {shows.map((show) => (
+              <li
+                key={show.id}
+                className="flex justify-between items-center border p-4 rounded-md"
+              >
                 <div>
                   <h3 className="font-semibold">{show.movieName}</h3>
                   <p className="text-gray-600">{show.theater}</p>
-                  <p className="text-gray-500 text-sm">{show.showTimes.join(', ')}</p>
+                  <p className="text-gray-500 text-sm">
+                    {show.showTimes.join(", ")}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleSelect(show)}
