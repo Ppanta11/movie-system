@@ -1,34 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { dummyShowsData } from "../../assets/assets";
-import { CheckIcon, StarIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import Title from "../../components/admin/Title.jsx";
-import { kConverter } from "../../lib/kConverter.js";
+import React, { useEffect, useState } from 'react';
+import { dummyShowsData } from '../../assets/assets';
+import { CheckIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import Title from '../../components/admin/Title.jsx';
+import { kConverter } from '../../lib/kConverter.js';
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { useAppContext } from "../../context/AppContext";
 
 const AddShows = () => {
-const{axios, getToken, user,image_base_url} =useAppContext()
   const currency = import.meta.env.VITE_CURRENCY;
-  //const { getToken } = useAppContext();
+  const { getToken } = useAppContext();
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [dateTimeSelection, setDateTimeSelection] = useState({});
-  const [dateTimeInput, setDateTimeInput] = useState("");
-  const [showPrice, setShowPrice] = useState("");
+  const [dateTimeInput, setDateTimeInput] = useState('');
+  const [showPrice, setShowPrice] = useState('');
   const [addingShow, setAddingShow] = useState(false);
 
   const fetchNowPlayingMovies = async () => {
-    try {
-      const{data} = await axios.get('/api/show/now-playing',{
-        headers: { Authorization: `Bearer ${await getToken()}` }})
-        if(data.success){
-          setNowPlayingMovies(data.movies)
-        }
-
-    } catch (error) {
-      console.error('Error fetching movies: ', error)
-    }
+    setNowPlayingMovies(dummyShowsData);
   };
+
+  useEffect(() => {
+    fetchNowPlayingMovies();
+  }, []);
 
   const handleDateTimeAdd = () => {
     if (!dateTimeInput || !selectedMovie) return;
@@ -36,7 +31,7 @@ const{axios, getToken, user,image_base_url} =useAppContext()
     const [date, time] = dateTimeInput.split("T");
     if (!date || !time) return;
 
-    setDateTimeSelection((prev) => {
+    setDateTimeSelection(prev => {
       const times = prev[date] || [];
       if (!times.includes(time)) {
         return { ...prev, [date]: [...times, time] };
@@ -46,8 +41,8 @@ const{axios, getToken, user,image_base_url} =useAppContext()
   };
 
   const handleRemoveTime = (date, time) => {
-    setDateTimeSelection((prev) => {
-      const filteredTimes = prev[date].filter((t) => t !== time);
+    setDateTimeSelection(prev => {
+      const filteredTimes = prev[date].filter(t => t !== time);
       const { [date]: _, ...rest } = prev;
       if (filteredTimes.length === 0) return rest;
       return { ...rest, [date]: filteredTimes };
@@ -58,39 +53,37 @@ const{axios, getToken, user,image_base_url} =useAppContext()
     try {
       setAddingShow(true);
 
-      if (
-        !selectedMovie ||
-        Object.keys(dateTimeSelection).length === 0 ||
-        !showPrice
-      ) {
-        return toast.error("Missing required fields");
+      if (!selectedMovie || Object.keys(dateTimeSelection).length === 0 || !showPrice) {
+        return toast.error('Missing required fields');
       }
 
-      const showInput = Object.entries(dateTimeSelection).map(
-        ([date, times]) => ({
-          date,
-          time: times,
-        }),
-      );
+      const showInput = Object.entries(dateTimeSelection).map(([date, times]) => ({
+        date,
+        time: times
+      }));
 
       const token = await getToken();
-      console.log("Token:", token);
+console.log("Token:", token);
+
 
       const payload = {
         movieId: selectedMovie,
         showsInput: showInput,
-        showPrice: Number(showPrice),
+        showPrice: Number(showPrice)
       };
 
-      const { data } = await axios.post("/api/show/add", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.post(
+        '/api/show/add',
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
 
       if (data.success) {
         toast.success(data.message);
         setSelectedMovie(null);
         setDateTimeSelection({});
-        setShowPrice("");
+        setShowPrice('');
       } else {
         toast.error(data.message);
       }
@@ -101,13 +94,6 @@ const{axios, getToken, user,image_base_url} =useAppContext()
       setAddingShow(false);
     }
   };
-
-  useEffect(() =>{
-    if(user){
-      fetchNowPlayingMovies();
-    }
-
-  }, [user]);
 
   return nowPlayingMovies.length > 0 ? (
     <>
@@ -123,7 +109,8 @@ const{axios, getToken, user,image_base_url} =useAppContext()
               onClick={() => setSelectedMovie(movie.id)}
             >
               <div className="relative rounded-lg overflow-hidden">
-                <img src={image_base_url + movie.poster_path}
+                <img
+                  src={movie.poster_path}
                   alt=""
                   className="w-full object-cover brightness-90"
                 />
@@ -132,9 +119,7 @@ const{axios, getToken, user,image_base_url} =useAppContext()
                     <StarIcon className="w-4 h-4 text-primary fill-primary" />
                     {movie.vote_average.toFixed(1)}
                   </p>
-                  <p className="text-gray-300">
-                    {kConverter(movie.vote_count)} Votes
-                  </p>
+                  <p className="text-gray-300">{kConverter(movie.vote_count)} Votes</p>
                 </div>
               </div>
 
@@ -169,9 +154,7 @@ const{axios, getToken, user,image_base_url} =useAppContext()
 
       {/* Date and time selection */}
       <div className="mt-6">
-        <label className="block text-sm font-medium mb-2">
-          Select Date and Time
-        </label>
+        <label className="block text-sm font-medium mb-2">Select Date and Time</label>
         <div className="inline-flex gap-5 border border-gray-600 p-1 pl-3 rounded-lg">
           <input
             type="datetime-local"
@@ -197,10 +180,7 @@ const{axios, getToken, user,image_base_url} =useAppContext()
               <p className="font-medium">{date}</p>
               <div className="flex flex-wrap gap-2">
                 {times.map((time) => (
-                  <div
-                    key={time}
-                    className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded"
-                  >
+                  <div key={time} className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded">
                     <span>{time}</span>
                     <button
                       onClick={() => handleRemoveTime(date, time)}
