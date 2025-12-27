@@ -6,7 +6,7 @@ import { clerkClient } from "@clerk/clerk-sdk-node";
 // API to check if user is admin
 export const isAdmin = async (req, res) => {
   try {
-    const { userId } = req.auth();     
+    const { userId } = req.auth();
     const clerkUser = await clerkClient.users.getUser(userId);
 
     const admin = clerkUser.publicMetadata.role === "admin";
@@ -16,8 +16,6 @@ export const isAdmin = async (req, res) => {
     res.status(500).json({ success: false, isAdmin: false });
   }
 };
-
-
 
 // API to get dashboard data
 export const getDashboardData = async (req, res) => {
