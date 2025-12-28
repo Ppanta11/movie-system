@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { dummyShowsData, dummyDateTimeData } from '../assets/assets';
-import BlurCircle from '../components/BlurCircle';
-import timeFormat from '../lib/timeFormat';
-import { StarIcon } from 'lucide-react';
-import DateSelect from '../components/DateSelect';
-import MovieCard from '../components/MovieCard';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { dummyShowsData, dummyDateTimeData } from "../assets/assets";
+import BlurCircle from "../components/BlurCircle";
+import timeFormat from "../lib/timeFormat";
+import { StarIcon } from "lucide-react";
+import DateSelect from "../components/DateSelect";
+import MovieCard from "../components/MovieCard";
 
 const MovieDetails = () => {
-
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const { id } = useParams();
   const [show, setShow] = useState(null);
 
   const getShow = async () => {
-    const foundShow = dummyShowsData.find(show => show._id === id);
+    const foundShow = dummyShowsData.find((show) => show._id === id);
     if (foundShow) {
       setShow({
         movie: foundShow,
-        dateTime: dummyDateTimeData
+        dateTime: dummyDateTimeData,
       });
     }
   };
@@ -55,9 +54,9 @@ const MovieDetails = () => {
           </p>
 
           <p>
-            {timeFormat(show.movie.runtime)} |{' '}
-            {show.movie.genres.map(genre => genre.name).join(', ')} |{' '}
-            {show.movie.release_date.split('-')[0]}
+            {timeFormat(show.movie.runtime)} |{" "}
+            {show.movie.genres.map((genre) => genre.name).join(", ")} |{" "}
+            {show.movie.release_date.split("-")[0]}
           </p>
           <div className="mt-6">
             <a
@@ -70,34 +69,43 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
-    <br/>
-      <p className='text-lg font-medium'>Movie Cast</p>
-      <div className='overflow-x-auto no-scrollbar mt-8 pb-4'>
-        <div className='flex items-center gap-4 w-max px-4'>
-        {show.movie.casts?.slice(0, 12).map((cast, index) => (
-        <div key={index} className='flex flex-col items-center text-center'>
-            <img src={cast.profile_path} alt=""
-            className='rounded-full h-20 md:h-20 aspect-square object-cover'
-            />
-            <p className='font-medium text-xs mt-3'>{cast.name}</p>
-        </div>
-))}
+      <br />
+      <p className="text-lg font-medium">Movie Cast</p>
+      <div className="overflow-x-auto no-scrollbar mt-8 pb-4">
+        <div className="flex items-center gap-4 w-max px-4">
+          {show.movie.casts?.slice(0, 12).map((cast, index) => (
+            <div key={index} className="flex flex-col items-center text-center">
+              <img
+                src={cast.profile_path}
+                alt=""
+                className="rounded-full h-20 md:h-20 aspect-square object-cover"
+              />
+              <p className="font-medium text-xs mt-3">{cast.name}</p>
+            </div>
+          ))}
         </div>
       </div>
-      <DateSelect dateTime={show.dateTime} id={id}/>
+      <DateSelect dateTime={show.dateTime} id={id} />
 
-      <p className='text-lg font-medium mt-20 mb-8'>You May Also Like </p>
-      <div className='flex flex-wrap max-sm:justify-center gap-8'>
-        {dummyShowsData.slice(0,4).map((movie, index)=>(
-            <MovieCard key={index} movie={movie}/>
+      <p className="text-lg font-medium mt-20 mb-8">You May Also Like </p>
+      <div className="flex flex-wrap max-sm:justify-center gap-8">
+        {dummyShowsData.slice(0, 4).map((movie, index) => (
+          <MovieCard key={index} movie={movie} />
         ))}
-
       </div>
-    <div className='flex justify-center mt-20'>
-        <button onClick={()=>{navigate('/movies'); scrollTo(0,0)}} className='px-10 py-3 text-sm bg-primary-dull
-        transition rounded-md font-medium cursor-pointer'> Show More</button>
-
-    </div>
+      <div className="flex justify-center mt-20">
+        <button
+          onClick={() => {
+            navigate("/movies");
+            scrollTo(0, 0);
+          }}
+          className="px-10 py-3 text-sm bg-primary-dull
+        transition rounded-md font-medium cursor-pointer"
+        >
+          {" "}
+          Show More
+        </button>
+      </div>
     </div>
   ) : (
     <div>Loading...</div>
