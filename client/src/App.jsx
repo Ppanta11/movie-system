@@ -13,8 +13,6 @@ import Dashboard from "./pages/admin/Dashboard";
 import ListShows from "./pages/admin/ListShows";
 import ListBookings from "./pages/admin/ListBookings";
 import Layout from "./pages/admin/Layout";
-import EditShows from "./pages/admin/EditShows";
-import DeleteShows from "./pages/admin/DeleteShows";
 import { useAppContext } from "./context/AppContext";
 import { SignIn } from "@clerk/clerk-react";
 
@@ -49,8 +47,6 @@ const App = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="add-shows" element={<AddShows />} />
-          <Route path="edit-shows" element={<EditShows />} />
-          <Route path="delete-shows" element={<DeleteShows />} />
           <Route path="list-shows" element={<ListShows />} />
           <Route path="list-bookings" element={<ListBookings />} />
         </Route>

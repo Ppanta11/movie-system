@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { dummyShowsData } from "../../assets/assets";
 import { CheckIcon, StarIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import Title from "../../components/admin/Title.jsx";
 import { kConverter } from "../../lib/kConverter.js";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import { useAppContext } from "../../context/AppContext";
 
 const AddShows = () => {
   const currency = import.meta.env.VITE_CURRENCY;
-  const { getToken } = useAppContext();
+  const { axios, getToken, user, image_base_url } = useAppContext();
+
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [dateTimeSelection, setDateTimeSelection] = useState({});
@@ -18,12 +17,28 @@ const AddShows = () => {
   const [addingShow, setAddingShow] = useState(false);
 
   const fetchNowPlayingMovies = async () => {
-    setNowPlayingMovies(dummyShowsData);
+    try {
+      const token = await getToken();
+      if (!token) {
+        toast.error("Session expired. Please log in again.");
+        return;
+      }
+
+      const { data } = await axios.get("/api/show/now-playing", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) setNowPlayingMovies(data.movies);
+      else toast.error(data.message || "Failed to fetch movies");
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      toast.error("Error fetching movies");
+    }
   };
 
   useEffect(() => {
-    fetchNowPlayingMovies();
-  }, []);
+    if (user) fetchNowPlayingMovies();
+  }, [user]);
 
   const handleDateTimeAdd = () => {
     if (!dateTimeInput || !selectedMovie) return;
@@ -33,9 +48,7 @@ const AddShows = () => {
 
     setDateTimeSelection((prev) => {
       const times = prev[date] || [];
-      if (!times.includes(time)) {
-        return { ...prev, [date]: [...times, time] };
-      }
+      if (!times.includes(time)) return { ...prev, [date]: [...times, time] };
       return prev;
     });
   };
@@ -53,23 +66,21 @@ const AddShows = () => {
     try {
       setAddingShow(true);
 
-      if (
-        !selectedMovie ||
-        Object.keys(dateTimeSelection).length === 0 ||
-        !showPrice
-      ) {
-        return toast.error("Missing required fields");
+      if (!selectedMovie || !showPrice || Object.keys(dateTimeSelection).length === 0) {
+        toast.error("Missing required fields");
+        return;
       }
 
-      const showInput = Object.entries(dateTimeSelection).map(
-        ([date, times]) => ({
-          date,
-          time: times,
-        }),
-      );
+      const showInput = Object.entries(dateTimeSelection).map(([date, times]) => ({
+        date,
+        time: times,
+      }));
 
       const token = await getToken();
-      console.log("Token:", token);
+      if (!token) {
+        toast.error("Session expired. Please log in again.");
+        return;
+      }
 
       const payload = {
         movieId: selectedMovie,
@@ -86,9 +97,7 @@ const AddShows = () => {
         setSelectedMovie(null);
         setDateTimeSelection({});
         setShowPrice("");
-      } else {
-        toast.error(data.message);
-      }
+      } else toast.error(data.message || "Failed to add show");
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("An error occurred. Please try again");
@@ -112,7 +121,7 @@ const AddShows = () => {
             >
               <div className="relative rounded-lg overflow-hidden">
                 <img
-                  src={movie.poster_path}
+                  src={image_base_url + movie.poster_path}
                   alt=""
                   className="w-full object-cover brightness-90"
                 />
@@ -121,9 +130,7 @@ const AddShows = () => {
                     <StarIcon className="w-4 h-4 text-primary fill-primary" />
                     {movie.vote_average.toFixed(1)}
                   </p>
-                  <p className="text-gray-300">
-                    {kConverter(movie.vote_count)} Votes
-                  </p>
+                  <p className="text-gray-300">{kConverter(movie.vote_count)} Votes</p>
                 </div>
               </div>
 
@@ -140,7 +147,6 @@ const AddShows = () => {
         </div>
       </div>
 
-      {/* Show price input */}
       <div className="mt-8">
         <label className="block text-sm font-medium mb-2">Show Price</label>
         <div className="inline-flex items-center gap-2 border border-gray-600 px-3 py-2 rounded-md">
@@ -156,11 +162,8 @@ const AddShows = () => {
         </div>
       </div>
 
-      {/* Date and time selection */}
       <div className="mt-6">
-        <label className="block text-sm font-medium mb-2">
-          Select Date and Time
-        </label>
+        <label className="block text-sm font-medium mb-2">Select Date and Time</label>
         <div className="inline-flex gap-5 border border-gray-600 p-1 pl-3 rounded-lg">
           <input
             type="datetime-local"
@@ -177,7 +180,6 @@ const AddShows = () => {
         </div>
       </div>
 
-      {/* Display selected times */}
       {Object.keys(dateTimeSelection).length > 0 && (
         <div className="mt-4">
           <p className="text-sm font-medium mb-2">Selected Show Times</p>
@@ -205,7 +207,6 @@ const AddShows = () => {
         </div>
       )}
 
-      {/* Add Show Button */}
       <div className="mt-6">
         <button
           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80"
@@ -215,35 +216,6 @@ const AddShows = () => {
           Add Show
         </button>
       </div>
-
-      {/* Display Selected Times */}
-      {Object.keys(dateTimeSelection).length > 0 && (
-        <div className="mt-6">
-          <h2 className="mb-2">Selected Date-Time</h2>
-          <ul className="space-y-3">
-            {Object.entries(dateTimeSelection).map(([date, times]) => (
-              <li key={date}>
-                <div className="font-medium">{date}</div>
-                <div className="flex flex-wrap gap-2 mt-1 text-sm">
-                  {times.map((time) => (
-                    <div
-                      key={time}
-                      className="border border-primary px-2 py-1 flex items-center rounded"
-                    >
-                      <span>{time}</span>
-                      <XMarkIcon
-                        onClick={() => handleRemoveTime(date, time)}
-                        width={15}
-                        className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </>
   ) : (
     <div>Loading...</div>

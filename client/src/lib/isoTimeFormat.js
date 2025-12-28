@@ -1,13 +1,16 @@
 import React from "react";
 
-const isoTimeFormat = (dateTime) => {
-  const date = new Date(dateTime);
-  const localTime = date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minutes: "2digits",
-    hour12: true,
-  });
-  return localTime;
+const isoTimeFormat = (time) => {
+  if (!time) return "";
+
+  // Handle "HH:mm" format
+  const [hours, minutes] = time.split(":").map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return time;
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
 export default isoTimeFormat;
