@@ -1,40 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { dummyShowsData } from "../../assets/assets";
 import { Loader } from "lucide-react";
 import { dateFormat } from "../../lib/dateFormat";
 import Title from "../../components/admin/Title";
-
-const currency = import.meta.env.VITE_CURRENCY;
+import { useAppContext } from "../../context/AppContext";
 
 const ListShows = () => {
+  const currency = import.meta.env.VITE_CURRENCY;
+  const { axios, getToken, user } = useAppContext();
+
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const getAllShows = async () => {
     try {
-      setShows([
-        {
-          movie: dummyShowsData[0],
-          showDateTime: "2025-06-30T02:30:00.000Z",
-          showPrice: 350,
-          OccupiedSeats: {
-            A1: "user_1",
-            A2: "user_2",
-            A3: "user_3",
-          },
-        },
-      ]);
+      const token = await getToken();
+      const { data } = await axios.get("/api/admin/all-shows", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setShows(data.shows || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load shows.");
+    } finally {
       setLoading(false);
-    } catch (error) {
-      console.error(error);
     }
   };
 
   useEffect(() => {
-    getAllShows();
-  }, []);
+    if (user) getAllShows();
+  }, [user]);
 
-  return !loading ? (
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
+  return (
     <>
       <Title text1="List" text2="Shows" />
 
@@ -54,14 +54,11 @@ const ListShows = () => {
                 key={index}
                 className="border-b border-primary/10 bg-primary/5 even:bg-primary/10"
               >
-                <td className="p-2 min-w-45 pl-5">{show.movie.title}</td>
+                <td className="p-2 min-w-45 pl-5">{show.movie?.title || "N/A"}</td>
                 <td className="p-2">{dateFormat(show.showDateTime)}</td>
+                <td className="p-2">{Object.keys(show.OccupiedSeats || {}).length}</td>
                 <td className="p-2">
-                  {Object.keys(show.OccupiedSeats).length}
-                </td>
-                <td className="p-2">
-                  {currency}{" "}
-                  {Object.keys(show.OccupiedSeats).length * show.showPrice}
+                  {currency} {Object.keys(show.OccupiedSeats || {}).length * (show.showPrice || 0)}
                 </td>
               </tr>
             ))}
@@ -69,8 +66,6 @@ const ListShows = () => {
         </table>
       </div>
     </>
-  ) : (
-    <p> Loading... </p>
   );
 };
 
