@@ -1,12 +1,12 @@
-import React from 'react'
-import HeroSection from '../components/HeroSection'
-import FeauturedSection from '../components/FeaturedSection'
+import React from "react";
+import HeroSection from "../components/HeroSection";
+import FeauturedSection from "../components/FeaturedSection";
 const Home = () => {
-  return(
+  return (
     <>
-    <HeroSection/>
-    <FeauturedSection/>
+      <HeroSection />
+      <FeauturedSection />
     </>
-  )
-}
-export default Home
+  );
+};
+export default Home;

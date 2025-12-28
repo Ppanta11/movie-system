@@ -1,23 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import Title from '../../components/admin/Title';
+import React, { useState, useEffect } from "react";
+import Title from "../../components/admin/Title";
 
 const DeleteShows = () => {
   const [shows, setShows] = useState([]);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchedShows = [
-      { id: 1, movieName: 'Movie A', theater: 'Theater 1', showTimes: ['2025-10-26T10:00', '2025-10-26T14:00'] },
-      { id: 2, movieName: 'Movie B', theater: 'Theater 2', showTimes: ['2025-10-26T12:00'] },
+      {
+        id: 1,
+        movieName: "Movie A",
+        theater: "Theater 1",
+        showTimes: ["2025-10-26T10:00", "2025-10-26T14:00"],
+      },
+      {
+        id: 2,
+        movieName: "Movie B",
+        theater: "Theater 2",
+        showTimes: ["2025-10-26T12:00"],
+      },
     ];
     setShows(fetchedShows);
   }, []);
 
   const handleDelete = (id) => {
-    const updatedShows = shows.filter(show => show.id !== id);
+    const updatedShows = shows.filter((show) => show.id !== id);
     setShows(updatedShows);
-    setMessage('Show deleted successfully!');
-    setTimeout(() => setMessage(''), 3000);
+    setMessage("Show deleted successfully!");
+    setTimeout(() => setMessage(""), 3000);
   };
 
   return (
@@ -31,13 +41,16 @@ const DeleteShows = () => {
           <p className="text-center text-gray-600">No shows available.</p>
         ) : (
           <ul className="space-y-4">
-            {shows.map(show => (
-              <li key={show.id} className="flex justify-between items-center border p-4 rounded-md">
+            {shows.map((show) => (
+              <li
+                key={show.id}
+                className="flex justify-between items-center border p-4 rounded-md"
+              >
                 <div>
                   <h3 className="font-semibold">{show.movieName}</h3>
                   <p className="text-gray-600">{show.theater}</p>
                   <p className="text-gray-500 text-sm">
-                    {show.showTimes.join(', ')}
+                    {show.showTimes.join(", ")}
                   </p>
                 </div>
                 <button
