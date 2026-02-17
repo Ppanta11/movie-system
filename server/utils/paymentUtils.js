@@ -3,7 +3,7 @@ function generatePaymentInformation(information) {
   const movieName = information.show.movie.title;
   const amount = information.booking.amount;
 
-  const totalAmount = amount * seatQuantity;
+  const totalAmount = amount;
   const purchaseOrderId = information.booking._id;
   const purchaseOrderName = `Tickets for ${movieName} X ${seatQuantity}`;
   const userName = information.user.name;

@@ -7,7 +7,7 @@ import { generatePaymentInformation } from "../utils/paymentUtils.js";
 // GET /api/bookings/my
 export const getMyBookings = async (req, res) => {
   try {
-    const userId = req.auth?.userId; // <-- get userId from Clerk
+    const userId = req.auth?.userId;
     if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
     const bookings = await Booking.find({ user: userId }).populate({
@@ -79,7 +79,7 @@ export const createBooking = async (req, res) => {
     await showData.save();
     console.log("Show updated with booked seats");
 
-    // Optional: initiate Khalti payment
+    // initiate Khalti payment
     const khaltiService = new KhaltiService();
     let khaltiUrl = "";
     try {
@@ -111,3 +111,30 @@ export const getOccupiedSeats = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+export const payWithKhalti = async (req, res) => {
+  console.log(req)
+  console.log('pay with khalti')
+  console.log(req.body)
+  const {user, show, _id} = req.body;
+  const bookingId = _id;
+
+  const userEntity = await User.findById(user);
+  const bookingEntity = await Booking.findById(bookingId);
+
+  const khaltiService = new KhaltiService();
+
+  const paymentInfo = generatePaymentInformation({
+    user:userEntity,
+    booking:bookingEntity,
+    show:show,
+  });
+
+  const khaltiUrl = await khaltiService.initiatePayment(paymentInfo);
+
+  return res.status(200).json({
+    success: true,
+    url: khaltiUrl,
+  })
+}
