@@ -42,6 +42,29 @@ class KhaltiService {
     const jsonData = await response.json();
     return jsonData?.payment_url;
   }
+
+  async verifyPayment(pidx) {
+    const khaltiUrl = "https://dev.khalti.com/api/v2/epayment/lookup/";
+    const khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
+
+    const response = await fetch(khaltiUrl, {
+      method: "POST",
+      body: JSON.stringify({ pidx }),
+      headers: {
+        Authorization: `key ${khaltiSecretKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Khalti verification failed: ${errorText}`);
+    }
+
+    const jsonData = await response.json();
+    return jsonData;
+  }
+
 }
 
 export default KhaltiService;

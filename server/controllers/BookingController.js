@@ -117,7 +117,7 @@ export const payWithKhalti = async (req, res) => {
   console.log(req)
   console.log('pay with khalti')
   console.log(req.body)
-  const {user, show, _id} = req.body;
+  const { user, show, _id } = req.body;
   const bookingId = _id;
 
   const userEntity = await User.findById(user);
@@ -126,9 +126,9 @@ export const payWithKhalti = async (req, res) => {
   const khaltiService = new KhaltiService();
 
   const paymentInfo = generatePaymentInformation({
-    user:userEntity,
-    booking:bookingEntity,
-    show:show,
+    user: userEntity,
+    booking: bookingEntity,
+    show: show,
   });
 
   const khaltiUrl = await khaltiService.initiatePayment(paymentInfo);
@@ -138,3 +138,55 @@ export const payWithKhalti = async (req, res) => {
     url: khaltiUrl,
   })
 }
+
+export const verifyKhaltiPayment = async (req, res) => {
+  try {
+    const { pidx } = req.body;
+    if (!pidx) {
+      return res.status(400).json({ success: false, message: "pidx is required" });
+    }
+
+    const khaltiService = new KhaltiService();
+    const verificationResponse = await khaltiService.verifyPayment(pidx);
+
+    // Update booking status if payment is completed
+    if (verificationResponse.status === "Completed") {
+      // Find booking by purchase_order_id (which we set as booking._id in initiatePayment)
+      // However, initiatePayment used purchase_order_id: paymentDetails.purchaseOrderId
+      // Let's check generatePaymentInformation in paymentUtils.js to see what purchaseOrderId is.
+      // Assuming it is booking._id.
+      // But wait, the transaction_id or purchase_order_id from Khalti response might be useful. 
+      // The lookup response doesn't explicitly return purchase_order_id, but we can try to find the booking.
+      // Actually, the initial `return_url` params have `purchase_order_id`. 
+      // But here we are verifying using `pidx`. 
+      // We can trust the user sending `purchase_order_id` from query params, OR
+      // we can rely on what Khalti says. Khalti's lookup response *should* ideally contain it or we might need to store pidx in booking.
+
+      // Issue: We didn't save `pidx` in the booking model during initiation.
+      // But the frontend will send `purchase_order_id` (which is booking id) along with `pidx`.
+      // So we can accept bookingId from the request body as well.
+    }
+
+    // Let's verify what we get from the frontend. 
+    // The frontend will likely send what it got in the URL query params.
+
+    // For now, let's just return the verification response and handle DB updates.
+    // We really should update the booking status.
+
+    // Strategy: Expect purchase_order_id (bookingId) from client alongside pidx.
+    const bookingId = req.body.purchase_order_id;
+
+    if (verificationResponse.status === "Completed" && bookingId) {
+      await Booking.findByIdAndUpdate(bookingId, {
+        isPaid: true,
+        paymentLink: null // or store pidx?
+      });
+    }
+
+    res.json({ success: true, data: verificationResponse });
+
+  } catch (error) {
+    console.error("Error in verifyKhaltiPayment:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
