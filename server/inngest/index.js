@@ -1,3 +1,4 @@
+import sendEmail from "../configs/nodeMailer.js";
 import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import User from "../models/User.js";
@@ -52,7 +53,7 @@ const syncUserUpdation = inngest.createFunction(
   },
 );
 
-//ingest to ancel booking after 10 mins if payment is not made
+//ingest to cancel booking after 10 mins if payment is not made
 const releaseSeatsAndDeleteBooking=  inngest.createFunction(
   {id: 'release-seats-delete-booking'},
   {event: 'app/checkpayment'},
@@ -77,15 +78,64 @@ const releaseSeatsAndDeleteBooking=  inngest.createFunction(
         await Booking.findByIdAndDelete(booking._id)
 
       }
-
-
     })
   }
 )
+
+//Inngest function to send email when user books a show
+const sendBookingConfirmatinEmail = inngest.createFunction(
+  {id: "sned-booking-confirmation-email"},
+  {event: "app/show.booked"},
+  async ({event, step}) =>{
+    const{bookingId} = event.data;
+
+    const booking = await Booking.findById(bookingId). populate({
+      path: 'show',
+      populate: {path: "movie", model:"Movie"}
+    }).populate('user');
+
+    await sendEmail({
+      to: booking.user.email,
+      subject: `Payment Confirmation: "${booking.show.movie.title}" booked!`,
+      body: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+          <h2>Hi ${booking.user.name},</h2>
+    
+          <p>
+            Your booking for 
+            <strong style="color: #F84565;">
+              "${booking.show.movie.title}"
+            </strong> is confirmed.
+          </p>
+    
+          <p>
+            <strong>Date:</strong> 
+            ${new Date(booking.show.showDateTime).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}
+            <br/>
+    
+            <strong>Time:</strong> 
+            ${new Date(booking.show.showDateTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}
+          </p>
+    
+          <p>Enjoy the show! 🎬</p>
+    
+          <p>
+            Thanks for booking with us! <br/>
+            - QuickShow Team
+          </p>
+        </div>
+      `
+    });
+
+
+  }
+
+ )
 
 export const functions = [
   syncUserCreation,
   syncUserDeletion,
   syncUserUpdation,
-  releaseSeatsAndDeleteBooking
+  releaseSeatsAndDeleteBooking,
+  sendBookingConfirmatinEmail
 ];
