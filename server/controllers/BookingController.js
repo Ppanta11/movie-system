@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import KhaltiService from "../services/khaltiService.js";
 import { generatePaymentInformation } from "../utils/paymentUtils.js";
+import { inngest } from "../inngest/index.js";
 
 // GET /api/bookings/my
 export const getMyBookings = async (req, res) => {
@@ -132,6 +133,15 @@ export const payWithKhalti = async (req, res) => {
   });
 
   const khaltiUrl = await khaltiService.initiatePayment(paymentInfo);
+
+  // Run inngest shedular function to check payment status after 10 mins
+
+   await inngest.send({
+    name: "app/checkpayment",
+    data: {
+      bookingId: booking._id.toString()
+    }
+   })
 
   return res.status(200).json({
     success: true,
