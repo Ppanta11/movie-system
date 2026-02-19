@@ -137,3 +137,64 @@ export const getShow = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const getRecommendedMovies = async (req, res) => {
+  try {
+    const { movieId } = req.params;
+
+    const targetMovie = await Movie.findById(movieId);
+    if (!targetMovie) {
+      return res.json({ success: false, message: "Movie not found" });
+    }
+
+    const allMovies = await Movie.find({ _id: { $ne: movieId } });
+
+    const targetGenres = new Set(targetMovie.genres.map((g) => g.id));
+    const targetCast = new Set(targetMovie.casts.map((c) => c.id));
+
+    const recommendations = allMovies.map((movie) => {
+      let score = 0;
+
+      movie.genres.forEach((g) => {
+        if (targetGenres.has(g.id)) {
+          score += 2;
+        }
+      });
+
+
+      movie.casts.forEach((c) => {
+        if (targetCast.has(c.id)) {
+          score += 1;
+        }
+      });
+
+      return { movie, score };
+    });
+
+    const topRecommendations = recommendations
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((item) => item.movie);
+
+    if (topRecommendations.length < 4) {
+      const remainingSlots = 4 - topRecommendations.length;
+      const existingIds = new Set([
+        movieId,
+        ...topRecommendations.map((m) => m._id.toString()),
+      ]);
+
+      const fallbackMovies = await Movie.find({
+        _id: { $nin: Array.from(existingIds) },
+      })
+        .sort({ release_date: -1 })
+        .limit(remainingSlots);
+
+      topRecommendations.push(...fallbackMovies);
+    }
+
+    res.json({ success: true, movies: topRecommendations });
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: error.message });
+  }
+};

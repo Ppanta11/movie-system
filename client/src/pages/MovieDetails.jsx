@@ -12,6 +12,7 @@ const MovieDetails = () => {
 
   const { id } = useParams();
   const [show, setShow] = useState(null);
+<<<<<<< HEAD
 
   const {shows, axios, image_base_url} = useAppContext()
 
@@ -19,6 +20,16 @@ const MovieDetails = () => {
     try {
       const {data} = await axios.get(`/api/show/${id}`)
       if(data.success){
+=======
+  const [recommendations, setRecommendations] = useState([]);
+
+  const { shows, axios, image_base_url } = useAppContext()
+
+  const getShow = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/${id}`)
+      if (data.success) {
+>>>>>>> feat/tushar
         setShow(data)
       }
     } catch (error) {
@@ -26,8 +37,26 @@ const MovieDetails = () => {
     }
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     getShow();
+=======
+  const getRecommendations = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/${id}/recommendations`);
+      if (data.success) {
+        setRecommendations(data.movies);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getShow();
+    getRecommendations();
+    window.scrollTo(0, 0);
+>>>>>>> feat/tushar
   }, [id]);
 
   return show ? (
@@ -92,7 +121,11 @@ const MovieDetails = () => {
 
       <p className="text-lg font-medium mt-20 mb-8">You May Also Like </p>
       <div className="flex flex-wrap max-sm:justify-center gap-8">
+<<<<<<< HEAD
         {shows.slice(0, 4).map((movie, index) => (
+=======
+        {recommendations.map((movie, index) => (
+>>>>>>> feat/tushar
           <MovieCard key={index} movie={movie} />
         ))}
       </div>
