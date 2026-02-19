@@ -12,13 +12,14 @@ const MovieDetails = () => {
 
   const { id } = useParams();
   const [show, setShow] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
 
-  const {shows, axios, image_base_url} = useAppContext()
+  const { shows, axios, image_base_url } = useAppContext()
 
   const getShow = async () => {
     try {
-      const {data} = await axios.get(`/api/show/${id}`)
-      if(data.success){
+      const { data } = await axios.get(`/api/show/${id}`)
+      if (data.success) {
         setShow(data)
       }
     } catch (error) {
@@ -26,8 +27,21 @@ const MovieDetails = () => {
     }
   };
 
+  const getRecommendations = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/${id}/recommendations`);
+      if (data.success) {
+        setRecommendations(data.movies);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getShow();
+    getRecommendations();
+    window.scrollTo(0, 0);
   }, [id]);
 
   return show ? (
@@ -92,7 +106,7 @@ const MovieDetails = () => {
 
       <p className="text-lg font-medium mt-20 mb-8">You May Also Like </p>
       <div className="flex flex-wrap max-sm:justify-center gap-8">
-        {shows.slice(0, 4).map((movie, index) => (
+        {recommendations.map((movie, index) => (
           <MovieCard key={index} movie={movie} />
         ))}
       </div>
